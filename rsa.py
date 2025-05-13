@@ -82,39 +82,41 @@ def chinese_rem(c, m1_q, m2_p, d, m_n):
     g, y2, y1 = ext_euclid(m2_p, m1_q)
     return ((c1 * y1 * m1_q) + (c2 * y2 * m2_p)) % m_n
 
+def generate_primes(min_val, max_val):
+    p,q = random.randint(min_val, max_val), random.randint(min_val, max_val)
+    while not is_prime_mr(p):
+        p = random.randint(min_val, max_val)
 
+    while not is_prime_mr(q) or q == p:
+        q = random.randint(min_val, max_val)
+    return p,q
+
+def generate_exp(phi):
+    e = random.randint(2, phi - 1)
+    gcd, x, _ = ext_euclid(e, phi)
+    while gcd != 1:
+        e = random.randint(2, phi - 1)
+        gcd, x, _ = ext_euclid(e, phi)
+
+    d = (x) % phi
+    return e,d
 
 def main():
+    p,q = generate_primes(1000, 100000)
 
-    p = random.randint(1000, 100000)
-    while not is_prime_mr(p):
-        p = random.randint(1000, 100000)
-    q = random.randint(1000, 100000)
-    while not is_prime_mr(q) or q == p:
-        q = random.randint(1000, 100000)
     n = p * q
     phi = (p-1)*(q-1)
-    e = random.randint(2, phi - 1)
-    while not (euclid(e, phi) == 1):
-        e = random.randint(2, phi - 1)
-    _, x, _ = ext_euclid(e,phi)
-    d = (x % phi + phi) % phi
+    e,d = generate_exp(phi)
 
-    m = 71331513
-    # c = mod_exp(m,e,n)
-    c = chinese_rem(m,q,p,e,n)
-    # dec = mod_exp(c,d,n)
-    dec = chinese_rem(c, q, p, d, n)
+    m = 713315134414487870415
+    enc = mod_exp(m,e,n)
+    dec = chinese_rem(enc, q, p, d, n)
 
-    print(m)
-    print(c)
-    print(dec)
+    print(m % n == dec)
 
-    # sig = chinese_rem(m,q,p,d,n)
-    # m1 = chinese_rem(sig,q,p,e,n)
-    sig = mod_exp(m, d, n)
+    sig = chinese_rem(m,q,p,d,n)
     m1 = mod_exp(sig,e,n)
-    print(m == m1)
+    print(m % n == m1)
 
 if __name__ == "__main__":
     main()
